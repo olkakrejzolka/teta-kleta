@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Niespodzianka na 50. Urodziny!</title>
+    
+    <!-- Import eleganckich czcionek z Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Biblioteka do efektu konfetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #fbf9f6; /* Ciepły, kremowy odcień */
+            --text-color: #333333;
+            --accent-color: #d4af37; /* Eleganckie złoto */
+            --accent-dark: #b5952f;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Lora', serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+        }
+
+        /* --- EKRAN POWITALNY --- */
+        #welcome-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            transition: opacity 0.8s ease-out;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        #welcome-screen h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+            animation: fadeInDown 1.2s ease-out;
+        }
+
+        #welcome-screen p {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            font-style: italic;
+            animation: fadeInUp 1.2s ease-out 0.3s backwards;
+        }
+
+        .btn-discover {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 18px 45px;
+            font-size: 1.25rem;
+            font-family: 'Playfair Display', serif;
+            cursor: pointer;
+            border-radius: 50px;
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: fadeInUp 1.2s ease-out 0.6s backwards;
+        }
+
+        .btn-discover:hover {
+            transform: scale(1.05) translateY(-2px);
+            background-color: var(--accent-dark);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
+        }
+
+        /* --- EKRAN GŁÓWNY (FILM + WIERSZ) --- */
+        #main-content {
+            display: none; /* Ukryte na start */
+            opacity: 0;
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        .main-title {
+            text-align: center;
+            color: var(--accent-color);
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-style: italic;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            color: #666;
+        }
+
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1.2f 1fr;
+            gap: 50px;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+
+        /* Użycie klasycznego layoutu tabelarycznego/blokowego dla kompatybilności */
+        .flex-container {
+            display: flex;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .video-section {
+            flex: 1.3;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.04);
+            border: 1px solid rgba(214, 175, 55, 0.1);
+        }
+
+        video {
+            width: 100%;
+            border-radius: 6px;
+            outline: none;
+            display: block;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .poem-section {
+            flex: 1;
+            padding: 10px 10px 10px 40px;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .poem-section h2 {
+            font-size: 2.2rem;
+            color: var(--accent-color);
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+
+        .poem-text {
+            font-size: 1.15rem;
+            line-height: 1.9;
+            white-space: pre-line;
+            color: #444;
+        }
+
+        /* --- SUBTELNY PANEL MUZYKI W TLE --- */
+        #music-control {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #fff;
+            border: 1px solid var(--accent-color);
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: none; /* Pokaże się po odkryciu niespodzianki */
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        #music-control:hover {
+            background: var(--bg-color);
+            transform: translateY(-2px);
+        }
+
+        .music-icon {
+            font-size: 1.2rem;
+        }
+
+        /* --- ANIMACJE --- */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsywność */
+        @media (max-width: 900px) {
+            .flex-container {
+                flex-direction: column;
+            }
+            .poem-section {
+                border-left: none;
+                border-top: 3px solid var(--accent-color);
+                padding-left: 0;
+                padding-top: 30px;
+                margin-top: 20px;
+            }
+            #welcome-screen h1 {
+                font-size: 2.5rem;
+            }
+            .main-title {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- AUDIO W TLE (będzie odtwarzane automatycznie po wyjściu z filmu) -->
+    <audio id="bgMusic" src="background.mp3" loop></audio>
+
+    <!-- EKRAN POWITALNY -->
+    <div id="welcome-screen">
+        <h1>Witaj, Kochana!</h1>
+        <p>Czy jesteś gotowa odkryć swoją niespodziankę urodzinową?</p>
+        <button class="btn-discover" onclick="revealSurprise()">Odkryj Niespodziankę</button>
+    </div>
+
+    <!-- EKRAN GŁÓWNY Z FILMEM I WIERSZEM -->
+    <div id="main-content">
+        <h1 class="main-title">Wszystkiego Najlepszego z okazji 50. Urodzin!</h1>
+        <p class="subtitle">Prezent od całej kochającej rodziny</p>
+        
+        <div class="flex-container">
+            <!-- Sekcja Wideo -->
+            <div class="video-section">
+                <video id="birthdayVideo" controls>
+                    <source src="film.mp4" type="video/mp4">
+                    Twoja przeglądarka nie obsługuje odtwarzacza wideo.
+                </video>
+            </div>
+
+            <!-- Sekcja Wiersza -->
+            <div class="poem-section">
+                <h2>Nasz wiersz dla Ciebie</h2>
+                <div class="poem-text">
+                    Pięćdziesiąt lat temu świat stał się piękniejszy,
+                    A każdy dzień z Tobą jest ten najcenniejszy.
+                    Dziś cała rodzina tu wspólnie się jedna,
+                    Bo taka jak Ty, Ciociu/Mamo/Żono, jest tylko jedna!
+
+                    W filmie tym uśmiech i serca składamy,
+                    Wspomnienia i chwile, które tak kochamy.
+                    Niech radosna nuta w Twym sercu wciąż gra,
+                    Niech szczęście i zdrowie przez całe życie trwa!
+
+                    * * *
+                    (Tutaj możesz wkleić dokładny tekst wiersza, 
+                    który recytujecie podczas nagrania)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL STEROWANIA MUZYKĄ (Pływający przycisk) -->
+    <div id="music-control" onclick="toggleMusic()">
+        <span class="music-icon" id="musicBtnIcon">🎵</span>
+        <span id="musicBtnText">Muzyka: Włączona</span>
+    </div>
+
+    <!-- SKRYPTY INTERAKCJI -->
+    <script>
+        const video = document.getElementById('birthdayVideo');
+        const bgMusic = document.getElementById('bgMusic');
+        const musicControl = document.getElementById('music-control');
+        const musicBtnIcon = document.getElementById('musicBtnIcon');
+        const musicBtnText = document.getElementById('musicBtnText');
+
+        // Ustawienie głośności muzyki w tle na subtelne 40%
+        bgMusic.volume = 0.4;
+
+        function revealSurprise() {
+            // 1. EFEKTOWNE KONFETTI (Wielki wybuch na start!)
+            // Główny wybuch na środku
+            confetti({
+                particleCount: 180,
+                spread: 100,
+                origin: { y: 0.6 },
+                colors: ['#d4af37', '#ffffff', '#f4e0a5', '#aa7c11']
+            });
+
+            // Boczne wystrzały (sekundę później dla efektu "wow")
+            setTimeout(() => {
+                confetti({ particleCount: 60, angle: 60, spread: 60, origin: { x: 0, y: 0.8 }, colors: ['#d4af37', '#ffffff'] });
+                confetti({ particleCount: 60, angle: 120, spread: 60, origin: { x: 1, y: 0.8 }, colors: ['#d4af37', '#ffffff'] });
+            }, 300);
+
+            // 2. PRZEŁĄCZENIE EKRANÓW
+            const welcomeScreen = document.getElementById('welcome-screen');
+            const mainContent = document.getElementById('main-content');
+
+            welcomeScreen.style.opacity = '0';
+            setTimeout(() => {
+                welcomeScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+                // Płynne pojawienie się treści głównej
+                setTimeout(() => { mainContent.style.opacity = '1'; }, 50);
+                
+                // Pokazanie panelu muzyki w tle
+                musicControl.style.display = 'flex';
+            }, 800);
+
+            // 3. FULL SCREEN I AUTOPLAY DLA FILMU
+            if (video.requestFullscreen) {
+                video.requestFullscreen();
+            } else if (video.webkitRequestFullscreen) { /* Safari */
+                video.webkitRequestFullscreen();
+            } else if (video.msRequestFullscreen) { /* IE11 */
+                video.msRequestFullscreen();
+            }
+
+            video.play().catch(error => {
+                console.log("Autoodtwarzanie zablokowane przez przeglądarkę, wymagany manualny start wideo.", error);
+            });
+        }
+
+        // 4. LOGIKA MUZYKI W TLE VS FILM
+        // Chcemy, aby muzyka grała TYLKO wtedy, gdy główny film NIE JEST odtwarzany (żeby dźwięki się nie nakładały)
+        
+        video.addEventListener('play', () => {
+            // Jeśli użytkownik włączy główny film, wyciszamy/pauzujemy muzykę w tle
+            bgMusic.pause();
+            updateMusicUI(false);
+        });
+
+        video.addEventListener('pause', () => {
+            // Jeśli film zostanie zapauzowany, muzyka w tle wraca
+            if (document.getElementById('main-content').style.display === 'block') {
+                bgMusic.play().catch(e => console.log("Muzyka czeka na interakcję"));
+                updateMusicUI(true);
+            }
+        });
+
+        video.addEventListener('ended', () => {
+            // Po zakończeniu filmu muzyka w tle automatycznie startuje
+            bgMusic.play().catch(e => console.log("Muzyka czeka na interakcję"));
+            updateMusicUI(true);
+            
+            // Małe konfetti na koniec filmu!
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+        });
+
+        // Obsługa wyjścia z trybu pełnoekranowego
+        const fullscreenEvents = ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'];
+        fullscreenEvents.forEach(evt => {
+            document.addEventListener(evt, () => {
+                const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+                
+                // Jeśli użytkownik wyszedł z pełnego ekranu, a film skończył się lub został zatrzymany
+                if (!isFullscreen && (video.paused || video.ended)) {
+                    bgMusic.play().catch(e => console.log("Muzyka w tle aktywowana"));
+                    updateMusicUI(true);
+                }
+            });
+        });
+
+        // Ręczne włączanie/wyłączanie muzyki w tle przez jubilatkę
+        function toggleMusic() {
+            if (bgMusic.paused) {
+                bgMusic.play();
+                updateMusicUI(true);
+            } else {
+                bgMusic.pause();
+                updateMusicUI(false);
+            }
+        }
+
+        function updateMusicUI(isPlaying) {
+            if (isPlaying) {
+                musicBtnIcon.innerText = "🎵";
+                musicBtnText.innerText = "Muzyka: Włączona";
+                musicControl.style.borderColor = "var(--accent-color)";
+            } else {
+                musicBtnIcon.innerText = "🔇";
+                musicBtnText.innerText = "Muzyka: Wyciszona";
+                musicControl.style.borderColor = "#ccc";
+            }
+        }
+    </script>
+</body>
+</html>
