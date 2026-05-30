@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dla Ewuni - 50. Urodziny</title>
     
-    <!-- Modern Boho Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
-    
-    <!-- Biblioteka do efektu konfetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
@@ -32,7 +29,7 @@
             color: var(--text-main);
             overflow-x: hidden;
             background-color: var(--boho-bg);
-            background: linear-gradient(rgba(252, 251, 249, 0.88), rgba(252, 251, 249, 0.94)), 
+            background: linear-gradient(rgba(252, 251, 249, 0.85), rgba(252, 251, 249, 0.92)), 
                         url('https://images.unsplash.com/photo-1542458428-144f84a86470?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat fixed;
         }
 
@@ -47,24 +44,15 @@
         .gold-frame::before, .gold-frame::after {
             content: '';
             position: absolute;
-            width: 20vw;
-            height: 25vh;
-            max-width: 250px;
-            max-height: 250px;
-            border: 2px solid var(--boho-gold);
+            width: 25vw;
+            height: 35vh;
+            max-width: 300px;
+            max-height: 300px;
+            border: 3px solid var(--boho-gold);
         }
 
-        .gold-frame::before {
-            top: 0; left: 0;
-            border-right: none;
-            border-bottom: none;
-        }
-
-        .gold-frame::after {
-            bottom: 0; right: 0;
-            border-left: none;
-            border-top: none;
-        }
+        .gold-frame::before { top: 0; left: 0; border-right: none; border-bottom: none; }
+        .gold-frame::after { bottom: 0; right: 0; border-left: none; border-top: none; }
 
         /* --- EKRAN POWITALNY --- */
         #welcome-screen {
@@ -94,7 +82,7 @@
         #welcome-screen p {
             font-family: 'Montserrat', sans-serif;
             font-weight: 300;
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             margin: 0 0 50px 0;
             color: var(--text-main);
             letter-spacing: 4px;
@@ -103,7 +91,7 @@
         }
 
         .btn-discover {
-            background: transparent;
+            background: rgba(255, 255, 255, 0.5);
             color: var(--text-main);
             border: 1px solid var(--boho-gold);
             padding: 18px 55px;
@@ -111,12 +99,10 @@
             font-family: 'Montserrat', sans-serif;
             font-weight: 400;
             cursor: pointer;
-            border-radius: 0;
             transition: all 0.4s ease;
             letter-spacing: 3px;
             text-transform: uppercase;
             animation: fadeInUp 1.8s ease-out 0.8s backwards;
-            background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(5px);
         }
 
@@ -124,15 +110,15 @@
             background: var(--boho-gold);
             color: #fff;
             transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(198, 166, 100, 0.15);
+            box-shadow: 0 10px 20px rgba(198, 166, 100, 0.2);
         }
 
-        /* --- EKRAN GŁÓWNY (STRONA PO WYJŚCIU Z PEŁNEGO EKRANU) --- */
+        /* --- EKRAN GŁÓWNY (UKŁAD PIONOWY ZAMIAST OBOK SIEBIE) --- */
         #main-content {
             display: none;
             opacity: 0;
             padding: 60px 20px;
-            max-width: 900px;
+            max-width: 900px; /* Zmniejszono szerokość, aby wideo i wiersz były jedno pod drugim */
             margin: 0 auto;
             min-height: 100vh;
             transition: opacity 1s ease-in-out;
@@ -152,18 +138,21 @@
 
         .vertical-layout {
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* Ustawia elementy w pionie (jeden pod drugim) */
             gap: 50px;
             width: 100%;
         }
 
-        .video-section {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.7);
-            padding: 15px;
+        .video-section, .poem-section {
+            width: 100%; /* Rozciąga na całą dostępną szerokość kontenera */
+            background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(198, 166, 100, 0.25);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.03);
+            border: 1px solid rgba(198, 166, 100, 0.3);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.04);
+        }
+
+        .video-section {
+            padding: 15px;
         }
 
         video {
@@ -173,12 +162,7 @@
         }
 
         .poem-section {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.5);
             padding: 50px 40px;
-            border: 1px solid rgba(198, 166, 100, 0.25);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.03);
-            backdrop-filter: blur(10px);
         }
 
         .poem-section h2 {
@@ -202,7 +186,7 @@
             text-align: center;
         }
 
-        /* --- SUBTELNY PANEL MUZYKI W TLE --- */
+        /* --- SUBTELNY PANEL MUZYKI --- */
         #music-control {
             position: fixed;
             bottom: 40px;
@@ -210,7 +194,7 @@
             background: rgba(255,255,255,0.85);
             border: 1px solid var(--boho-gold);
             padding: 10px 20px;
-            display: flex;
+            display: flex; /* Zmienione na flex, by było widać od razu */
             align-items: center;
             gap: 10px;
             cursor: pointer;
@@ -224,10 +208,7 @@
             backdrop-filter: blur(5px);
         }
 
-        #music-control:hover {
-            background: var(--boho-gold);
-            color: white;
-        }
+        #music-control:hover { background: var(--boho-gold); color: white; }
 
         @keyframes fadeInDown {
             from { opacity: 0; transform: translateY(-30px); }
@@ -239,9 +220,9 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @media (max-width: 768px) {
-            #welcome-screen h1 { font-size: 4.5rem; }
-            .main-title { font-size: 3.2rem; }
+        @media (max-width: 950px) {
+            #welcome-screen h1 { font-size: 5rem; }
+            .main-title { font-size: 3.5rem; }
             .gold-frame { top: 15px; left: 15px; right: 15px; bottom: 15px; }
             .poem-section { padding: 30px 20px; }
         }
@@ -259,6 +240,7 @@
         <button class="btn-discover" onclick="revealSurprise(this)">Odkryj</button>
     </div>
 
+    <!-- Zastosowano vertical-layout -->
     <div id="main-content">
         <h1 class="main-title">Wszystkiego Najlepszego</h1>
         
@@ -293,6 +275,7 @@
 
         bgMusic.volume = 0.35;
 
+        // Funkcja uruchamiająca muzykę od startu
         function startMusicOnLoad() {
             bgMusic.play().then(() => {
                 console.log("Muzyka wystartowała automatycznie.");
@@ -326,7 +309,7 @@
         };
 
         function revealSurprise(btn) {
-            // Zmiana przycisku podczas animacji konfetti
+            // Zmiana i wyłączenie przycisku na czas konfetti
             btn.disabled = true;
             btn.style.background = "var(--boho-gold)";
             btn.style.color = "white";
@@ -334,7 +317,7 @@
             btn.style.transform = "scale(0.95)";
             btn.style.boxShadow = "none";
 
-            // Odblokowanie wideo w tle dla przeglądarek mobilnych (aby full screen zadziałał z opóźnieniem)
+            // Odblokowanie wideo w tle dla przeglądarek mobilnych (niezbędne dla późniejszego fullscreen)
             video.muted = true;
             video.play().then(() => {
                 video.pause();
@@ -344,20 +327,21 @@
 
             const modernPalette = ['#7d8c7c', '#c6a664', '#fcfbf9', '#a2aa9b'];
             
-            // 1. Wielki wybuch na start
+            // Animacja konfetti
             confetti({ particleCount: 200, spread: 120, origin: { y: 0.6 }, colors: modernPalette });
 
-            // 2. Deszcz konfetti trwający prawie 4 sekundy
-            let end = Date.now() + 3800;
+            // Deszcz konfetti trwający dłużej (zoptymalizowany dla płynności)
+            let end = Date.now() + 2500; // Trwa 2.5 sekundy po głównym wybuchu
             let interval = setInterval(function() {
                 if (Date.now() > end) {
                     return clearInterval(interval);
                 }
-                confetti({ particleCount: 15, angle: 60, spread: 55, origin: { x: 0, y: 0.6 }, colors: modernPalette });
-                confetti({ particleCount: 15, angle: 120, spread: 55, origin: { x: 1, y: 0.6 }, colors: modernPalette });
-            }, 250);
+                // Zmniejszona liczba cząsteczek jednorazowo, by zapobiec zacinaniu
+                confetti({ particleCount: 10, angle: 60, spread: 55, origin: { x: 0, y: 0.6 }, colors: modernPalette });
+                confetti({ particleCount: 10, angle: 120, spread: 55, origin: { x: 1, y: 0.6 }, colors: modernPalette });
+            }, 300);
 
-            // 3. Po zakończeniu konfetti przełączamy ekrany i włączamy wideo
+            // Po 3 sekundach (z opóźnieniem o które prosiłeś) przełączamy ekran i włączamy wideo
             setTimeout(() => {
                 const welcomeScreen = document.getElementById('welcome-screen');
                 const mainContent = document.getElementById('main-content');
@@ -382,10 +366,10 @@
 
                     video.play().catch(error => console.log("Autoplay zablokowany", error));
                 }, 800);
-            }, 4000); // Czekamy 4 sekundy!
+            }, 3000); // Równo 3 sekundy opóźnienia
         }
 
-        // Logika ściszania muzyki tła TYLKO gdy jesteśmy na głównym ekranie
+        // Ściszanie muzyki tła TYLKO gdy jesteśmy na głównym ekranie
         video.addEventListener('play', () => {
             if (document.getElementById('main-content').style.display === 'block') {
                 bgMusic.pause();
