@@ -309,7 +309,7 @@
         const musicBtnIcon = document.getElementById('musicBtnIcon');
         const musicBtnText = document.getElementById('musicBtnText');
 
-        bgMusic.volume = 0.35;
+        bgMusic.volume = 0.18;
 
         window.onload = function() {
             fetch('wiersz.txt')
@@ -320,13 +320,20 @@
                 .catch(error => console.error(error));
         };
 
+        function isMobile() {
+            return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        }
+
         function revealSurprise(btn) {
             btn.disabled = true;
             btn.innerText = "Chwileczkę...";
 
-            // Odpalamy muzykę przy kliknięciu (aby ominąć blokady przeglądarki)
+            // Odblokowanie audio SYNCHRONICZNIE w handlerze kliknięcia (wymóg iOS)
             bgMusic.play().catch(e => console.log(e));
             updateMusicUI(true);
+            // Odblokowanie wideo na iOS (musi być w tym samym callstack co kliknięcie)
+            video.muted = true;
+            video.play().then(() => { video.pause(); video.muted = false; video.currentTime = 0; }).catch(() => {});
 
             // Wybuch konfetti
             const modernPalette = ['#7d8c7c', '#c6a664', '#fcfbf9', '#a2aa9b'];
@@ -353,7 +360,8 @@
                     mainContent.style.opacity = '0';
 
                     setTimeout(() => {
-                        const reqFS = video.requestFullscreen || video.webkitRequestFullscreen;
+                        // Na mobile fullscreen przejmuje audio session iOS – pomijamy
+                        const reqFS = !isMobile() && (video.requestFullscreen || video.webkitRequestFullscreen);
                         if (reqFS) {
                             document.addEventListener('fullscreenchange', handleFullscreenChange);
                             document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
@@ -366,7 +374,7 @@
                         } else {
                             showMainContent();
                         }
-                        video.play();
+                        video.play().catch(e => console.log(e));
                     }, 100);
                 }, 500);
             }, 1500); // 1.5 sekundy po konfetti
