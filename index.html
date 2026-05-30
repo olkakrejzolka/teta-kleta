@@ -5,16 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dla Ewuni - 50. Urodziny</title>
     
+    <!-- Modern Boho Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
     
+    <!-- Biblioteka do efektu konfetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
         :root {
-            --boho-green: #7d8c7c;     /* Zgaszona, eukaliptusowa zieleń */
-            --boho-gold: #c6a664;      /* Eleganckie, stonowane złoto */
-            --boho-bg: #fcfbf9;        /* Bardzo jasny, ciepły krem */
-            --text-main: #3a3b36;      /* Głęboki, miękki szaro-brąz */
+            --boho-green: #7d8c7c;
+            --boho-gold: #c6a664;
+            --boho-bg: #fcfbf9;
+            --text-main: #3a3b36;
         }
 
         *, *::before, *::after {
@@ -30,39 +32,34 @@
             color: var(--text-main);
             overflow-x: hidden;
             background-color: var(--boho-bg);
-            
-            /* Tło eukaliptusowe - ładuje się delikatny obraz z sieci. 
-               Możesz podmienić na "background: url('twoje-zdjecie.jpg');" */
-            background: linear-gradient(rgba(252, 251, 249, 0.85), rgba(252, 251, 249, 0.92)), 
+            background: linear-gradient(rgba(252, 251, 249, 0.88), rgba(252, 251, 249, 0.94)), 
                         url('https://images.unsplash.com/photo-1542458428-144f84a86470?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat fixed;
         }
 
-        /* --- ZŁOTE RAMKI W ROGACH (CSS) --- */
+        /* --- ZŁOTE RAMKI W ROGACH --- */
         .gold-frame {
             position: fixed;
             top: 25px; left: 25px; right: 25px; bottom: 25px;
-            pointer-events: none; /* Żeby można było klikać to, co pod ramką */
+            pointer-events: none;
             z-index: 5;
         }
 
         .gold-frame::before, .gold-frame::after {
             content: '';
             position: absolute;
-            width: 25vw;
-            height: 35vh;
-            max-width: 300px;
-            max-height: 300px;
-            border: 3px solid var(--boho-gold);
+            width: 20vw;
+            height: 25vh;
+            max-width: 250px;
+            max-height: 250px;
+            border: 2px solid var(--boho-gold);
         }
 
-        /* Górny lewy róg */
         .gold-frame::before {
             top: 0; left: 0;
             border-right: none;
             border-bottom: none;
         }
 
-        /* Dolny prawy róg */
         .gold-frame::after {
             bottom: 0; right: 0;
             border-left: none;
@@ -97,7 +94,7 @@
         #welcome-screen p {
             font-family: 'Montserrat', sans-serif;
             font-weight: 300;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             margin: 0 0 50px 0;
             color: var(--text-main);
             letter-spacing: 4px;
@@ -114,12 +111,12 @@
             font-family: 'Montserrat', sans-serif;
             font-weight: 400;
             cursor: pointer;
-            border-radius: 0; /* Nowoczesny, kwadratowy/ostry przycisk pasujący do ramy */
+            border-radius: 0;
             transition: all 0.4s ease;
             letter-spacing: 3px;
             text-transform: uppercase;
             animation: fadeInUp 1.8s ease-out 0.8s backwards;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(5px);
         }
 
@@ -127,15 +124,15 @@
             background: var(--boho-gold);
             color: #fff;
             transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(198, 166, 100, 0.2);
+            box-shadow: 0 10px 20px rgba(198, 166, 100, 0.15);
         }
 
-        /* --- EKRAN GŁÓWNY (FILM + WIERSZ) --- */
+        /* --- EKRAN GŁÓWNY (STRONA PO WYJŚCIU Z PEŁNEGO EKRANU) --- */
         #main-content {
             display: none;
             opacity: 0;
-            padding: 60px 40px;
-            max-width: 1400px;
+            padding: 60px 20px;
+            max-width: 900px;
             margin: 0 auto;
             min-height: 100vh;
             transition: opacity 1s ease-in-out;
@@ -153,19 +150,20 @@
             font-weight: 600;
         }
 
-        .flex-container {
+        .vertical-layout {
             display: flex;
+            flex-direction: column;
             gap: 50px;
-            align-items: flex-start;
+            width: 100%;
         }
 
         .video-section {
-            flex: 1.4;
+            width: 100%;
             background: rgba(255, 255, 255, 0.7);
             padding: 15px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(198, 166, 100, 0.3);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.04);
+            border: 1px solid rgba(198, 166, 100, 0.25);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.03);
         }
 
         video {
@@ -175,37 +173,30 @@
         }
 
         .poem-section {
-            flex: 1;
+            width: 100%;
             background: rgba(255, 255, 255, 0.5);
-            padding: 40px;
-            border: 1px solid rgba(198, 166, 100, 0.3);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.04);
+            padding: 50px 40px;
+            border: 1px solid rgba(198, 166, 100, 0.25);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.03);
             backdrop-filter: blur(10px);
-            max-height: 75vh;
-            overflow-y: auto;
         }
-
-        /* Stylizacja paska przewijania wiersza */
-        .poem-section::-webkit-scrollbar { width: 4px; }
-        .poem-section::-webkit-scrollbar-track { background: transparent; }
-        .poem-section::-webkit-scrollbar-thumb { background: var(--boho-gold); }
 
         .poem-section h2 {
             font-family: 'Cormorant Garamond', serif;
             font-weight: 600;
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             color: var(--boho-green);
             text-align: center;
-            margin: 0 0 25px 0;
+            margin: 0 0 30px 0;
             border-bottom: 1px solid var(--boho-gold);
-            padding-bottom: 15px;
+            padding-bottom: 20px;
             letter-spacing: 2px;
         }
 
         .poem-text {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 1.7rem;
-            line-height: 1.7;
+            font-size: 1.75rem;
+            line-height: 1.8;
             white-space: pre-line;
             color: var(--text-main);
             text-align: center;
@@ -216,10 +207,10 @@
             position: fixed;
             bottom: 40px;
             right: 40px;
-            background: rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.85);
             border: 1px solid var(--boho-gold);
             padding: 10px 20px;
-            display: none;
+            display: flex;
             align-items: center;
             gap: 10px;
             cursor: pointer;
@@ -227,7 +218,7 @@
             z-index: 100;
             color: var(--text-main);
             font-family: 'Montserrat', sans-serif;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             backdrop-filter: blur(5px);
@@ -238,7 +229,6 @@
             color: white;
         }
 
-        /* --- ANIMACJE --- */
         @keyframes fadeInDown {
             from { opacity: 0; transform: translateY(-30px); }
             to { opacity: 1; transform: translateY(0); }
@@ -249,13 +239,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Responsywność */
-        @media (max-width: 950px) {
-            .flex-container { flex-direction: column; }
-            .poem-section { max-height: none; }
-            #welcome-screen h1 { font-size: 5rem; }
-            .main-title { font-size: 3.5rem; }
+        @media (max-width: 768px) {
+            #welcome-screen h1 { font-size: 4.5rem; }
+            .main-title { font-size: 3.2rem; }
             .gold-frame { top: 15px; left: 15px; right: 15px; bottom: 15px; }
+            .poem-section { padding: 30px 20px; }
         }
     </style>
 </head>
@@ -268,16 +256,16 @@
     <div id="welcome-screen">
         <h1>Ewuniu!</h1>
         <p>Twoja Niespodzianka</p>
-        <button class="btn-discover" onclick="revealSurprise()">Odkryj</button>
+        <button class="btn-discover" onclick="revealSurprise(this)">Odkryj</button>
     </div>
 
     <div id="main-content">
         <h1 class="main-title">Wszystkiego Najlepszego</h1>
         
-        <div class="flex-container">
+        <div class="vertical-layout">
             <div class="video-section">
                 <video id="birthdayVideo" controls>
-                    <source src="0530.mov" type="video/mp4">
+                    <source src="0530.mp4" type="video/mp4">
                     Twoja przeglądarka nie obsługuje odtwarzacza wideo.
                 </video>
             </div>
@@ -305,8 +293,23 @@
 
         bgMusic.volume = 0.35;
 
-        // ŁADOWANIE WIERSZA Z PLIKU TXT
+        function startMusicOnLoad() {
+            bgMusic.play().then(() => {
+                console.log("Muzyka wystartowała automatycznie.");
+            }).catch(error => {
+                console.log("Autoplay dźwięku zablokowany. Czekam na kliknięcie...");
+                document.addEventListener('click', () => {
+                    if (document.getElementById('welcome-screen').style.display !== 'none') {
+                        bgMusic.play().catch(e => console.log(e));
+                        updateMusicUI(true);
+                    }
+                }, { once: true });
+            });
+        }
+
         window.onload = function() {
+            startMusicOnLoad();
+
             fetch('wiersz.txt')
                 .then(response => {
                     if (!response.ok) throw new Error('Błąd pliku txt');
@@ -318,70 +321,91 @@
                 .catch(error => {
                     console.error(error);
                     document.getElementById('poem-container').innerHTML = 
-                        "<i>(Upewnij się, że plik wiersz.txt znajduje się w tym samym folderze, a strona jest uruchomiona na serwerze).</i>";
+                        "<i>(Upewnij się, że plik wiersz.txt znajduje się w tym samym folderze).</i>";
                 });
         };
 
-        function revealSurprise() {
-            // Konfetti eukaliptusowo-złote
+        function revealSurprise(btn) {
+            // Zmiana przycisku podczas animacji konfetti
+            btn.disabled = true;
+            btn.style.background = "var(--boho-gold)";
+            btn.style.color = "white";
+            btn.innerText = "Chwileczkę...";
+            btn.style.transform = "scale(0.95)";
+            btn.style.boxShadow = "none";
+
+            // Odblokowanie wideo w tle dla przeglądarek mobilnych (aby full screen zadziałał z opóźnieniem)
+            video.muted = true;
+            video.play().then(() => {
+                video.pause();
+                video.muted = false;
+                video.currentTime = 0;
+            }).catch(e => console.log(e));
+
             const modernPalette = ['#7d8c7c', '#c6a664', '#fcfbf9', '#a2aa9b'];
-            confetti({
-                particleCount: 150,
-                spread: 100,
-                origin: { y: 0.6 },
-                colors: modernPalette
-            });
+            
+            // 1. Wielki wybuch na start
+            confetti({ particleCount: 200, spread: 120, origin: { y: 0.6 }, colors: modernPalette });
 
+            // 2. Deszcz konfetti trwający prawie 4 sekundy
+            let end = Date.now() + 3800;
+            let interval = setInterval(function() {
+                if (Date.now() > end) {
+                    return clearInterval(interval);
+                }
+                confetti({ particleCount: 15, angle: 60, spread: 55, origin: { x: 0, y: 0.6 }, colors: modernPalette });
+                confetti({ particleCount: 15, angle: 120, spread: 55, origin: { x: 1, y: 0.6 }, colors: modernPalette });
+            }, 250);
+
+            // 3. Po zakończeniu konfetti przełączamy ekrany i włączamy wideo
             setTimeout(() => {
-                confetti({ particleCount: 70, angle: 60, spread: 80, origin: { x: 0, y: 0.8 }, colors: modernPalette });
-                confetti({ particleCount: 70, angle: 120, spread: 80, origin: { x: 1, y: 0.8 }, colors: modernPalette });
-            }, 350);
+                const welcomeScreen = document.getElementById('welcome-screen');
+                const mainContent = document.getElementById('main-content');
 
-            // Zmiana ekranów
-            const welcomeScreen = document.getElementById('welcome-screen');
-            const mainContent = document.getElementById('main-content');
+                welcomeScreen.style.opacity = '0';
+                setTimeout(() => {
+                    welcomeScreen.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    setTimeout(() => { 
+                        mainContent.style.opacity = '1'; 
+                        window.dispatchEvent(new Event('resize'));
+                    }, 50);
 
-            welcomeScreen.style.opacity = '0';
-            setTimeout(() => {
-                welcomeScreen.style.display = 'none';
-                mainContent.style.display = 'block';
-                setTimeout(() => { 
-                    mainContent.style.opacity = '1'; 
-                    window.dispatchEvent(new Event('resize'));
-                }, 50);
-                
-                musicControl.style.display = 'flex';
-            }, 1000);
+                    // Odpalenie wideo na pełnym ekranie
+                    if (video.requestFullscreen) {
+                        video.requestFullscreen().catch(e => console.log(e));
+                    } else if (video.webkitRequestFullscreen) {
+                        video.webkitRequestFullscreen();
+                    } else if (video.msRequestFullscreen) {
+                        video.msRequestFullscreen();
+                    }
 
-            // Pełny ekran i Autoplay
-            if (video.requestFullscreen) {
-                video.requestFullscreen();
-            } else if (video.webkitRequestFullscreen) {
-                video.webkitRequestFullscreen();
-            } else if (video.msRequestFullscreen) {
-                video.msRequestFullscreen();
-            }
-
-            video.play().catch(error => console.log("Autoplay zablokowany", error));
+                    video.play().catch(error => console.log("Autoplay zablokowany", error));
+                }, 800);
+            }, 4000); // Czekamy 4 sekundy!
         }
 
-        // Sterowanie dźwiękiem
+        // Logika ściszania muzyki tła TYLKO gdy jesteśmy na głównym ekranie
         video.addEventListener('play', () => {
-            bgMusic.pause();
-            updateMusicUI(false);
+            if (document.getElementById('main-content').style.display === 'block') {
+                bgMusic.pause();
+                updateMusicUI(false);
+            }
         });
 
         video.addEventListener('pause', () => {
             if (document.getElementById('main-content').style.display === 'block') {
-                bgMusic.play().catch(e => console.log("Muzyka czeka na ruch"));
+                bgMusic.play().catch(e => console.log(e));
                 updateMusicUI(true);
             }
         });
 
         video.addEventListener('ended', () => {
-            bgMusic.play().catch(e => console.log("Muzyka czeka na ruch"));
-            updateMusicUI(true);
-            confetti({ particleCount: 50, spread: 70, origin: { y: 0.7 }, colors: ['#c6a664', '#7d8c7c'] });
+            if (document.getElementById('main-content').style.display === 'block') {
+                bgMusic.play().catch(e => console.log(e));
+                updateMusicUI(true);
+                confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 }, colors: ['#c6a664', '#7d8c7c'] });
+            }
         });
 
         const fullscreenEvents = ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'];
@@ -389,7 +413,7 @@
             document.addEventListener(evt, () => {
                 const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
                 if (!isFullscreen && (video.paused || video.ended)) {
-                    bgMusic.play().catch(e => console.log("Muzyka po full screen"));
+                    bgMusic.play().catch(e => console.log(e));
                     updateMusicUI(true);
                 }
             });
@@ -409,7 +433,7 @@
             if (isPlaying) {
                 musicBtnIcon.innerText = "🎵";
                 musicBtnText.innerText = "Muzyka gra";
-                musicControl.style.background = "rgba(255,255,255,0.8)";
+                musicControl.style.background = "rgba(255,255,255,0.85)";
                 musicControl.style.color = "var(--text-main)";
             } else {
                 musicBtnIcon.innerText = "🔇";
