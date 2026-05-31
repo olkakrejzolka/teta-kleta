@@ -230,10 +230,10 @@
             position: fixed;
             bottom: 30px;
             right: 30px;
-            background: rgba(255,255,255,0.85);
+            background: rgba(247, 235, 218, 0.92);
             border: 1px solid var(--boho-gold);
             padding: 10px 20px;
-            display: flex; 
+            display: none;
             align-items: center;
             gap: 10px;
             cursor: pointer;
@@ -260,15 +260,69 @@
             .gold-frame { top: 15px; left: 15px; right: 15px; bottom: 15px; }
             video { max-height: 30vh; }
         }
+
+        /* --- EKRAN ŁADOWANIA --- */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 22px;
+            z-index: 50;
+            background: inherit;
+            transition: opacity 0.8s ease;
+        }
+
+        .loader-ring {
+            width: 54px;
+            height: 54px;
+            border: 3px solid rgba(198, 166, 100, 0.2);
+            border-top-color: var(--boho-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loader-text {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 300;
+            font-size: 0.85rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: var(--boho-gold);
+        }
+
+        .loader-bar-wrap {
+            width: 180px;
+            height: 2px;
+            background: rgba(198, 166, 100, 0.2);
+        }
+
+        .loader-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--boho-gold);
+            transition: width 0.3s ease;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div class="gold-frame"></div>
 
+    <!-- Ekran ładowania -->
+    <div id="loading-screen">
+        <div class="loader-ring"></div>
+        <div class="loader-bar-wrap"><div class="loader-bar" id="loader-bar"></div></div>
+        <div class="loader-text" id="loader-text">Przygotowuję niespodziankę…</div>
+    </div>
+
     <audio id="bgMusic" src="background.mp3" loop></audio>
 
-    <div id="welcome-screen">
+    <div id="welcome-screen" style="display:none; opacity:0;">
         <h1>Ewuniu!</h1>
         <p>Twoja Niespodzianka</p>
         <button class="btn-discover" onclick="revealSurprise(this)">Odkryj</button>
@@ -314,14 +368,62 @@
         window.onload = function() {
             fetch('wiersz.txt')
                 .then(response => response.text())
-                .then(text => {
-                    document.getElementById('poem-container').innerText = text;
-                })
+                .then(text => { document.getElementById('poem-container').innerText = text; })
                 .catch(error => console.error(error));
+
+            // Pobierz wideo jako blob z paskiem postępu
+            const loaderBar = document.getElementById('loader-bar');
+            const loaderText = document.getElementById('loader-text');
+
+            fetch('0530.mp4')
+                .then(response => {
+                    if (!response.ok) throw new Error('fetch error');
+                    const total = parseInt(response.headers.get('Content-Length') || '0');
+                    const reader = response.body.getReader();
+                    const chunks = [];
+                    let loaded = 0;
+
+                    function read() {
+                        return reader.read().then(({ done, value }) => {
+                            if (done) return;
+                            chunks.push(value);
+                            loaded += value.length;
+                            if (total > 0) {
+                                loaderBar.style.width = Math.round((loaded / total) * 100) + '%';
+                            } else {
+                                // brak Content-Length – animuj pulsująco
+                                loaderBar.style.width = '60%';
+                            }
+                            return read();
+                        });
+                    }
+
+                    return read().then(() => new Blob(chunks, { type: 'video/mp4' }));
+                })
+                .then(blob => {
+                    video.src = URL.createObjectURL(blob);
+                    video.load();
+                    showWelcome();
+                })
+                .catch(e => {
+                    console.log('Blob preload nieudany, kontynuuję z oryginalnym src:', e);
+                    showWelcome();
+                });
         };
 
-        function isMobile() {
-            return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        function showWelcome() {
+            const ls = document.getElementById('loading-screen');
+            const ws = document.getElementById('welcome-screen');
+            ls.style.opacity = '0';
+            setTimeout(() => {
+                ls.style.display = 'none';
+                ws.style.display = 'flex';
+                requestAnimationFrame(() => { ws.style.opacity = '1'; });
+            }, 800);
+        }
+
+        function isIOS() {
+            return /iPhone|iPad|iPod/i.test(navigator.userAgent);
         }
 
         function revealSurprise(btn) {
@@ -360,8 +462,8 @@
                     mainContent.style.opacity = '0';
 
                     setTimeout(() => {
-                        // Na mobile fullscreen przejmuje audio session iOS – pomijamy
-                        const reqFS = !isMobile() && (video.requestFullscreen || video.webkitRequestFullscreen);
+                        // Pomijamy fullscreen tylko na iOS (przejmuje sesję audio)
+                        const reqFS = !isIOS() && (video.requestFullscreen || video.webkitRequestFullscreen);
                         if (reqFS) {
                             document.addEventListener('fullscreenchange', handleFullscreenChange);
                             document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
@@ -393,6 +495,7 @@
         // Funkcja bezpiecznie ładująca główną zawartość
         function showMainContent() {
             document.getElementById('main-content').style.display = 'flex';
+            document.getElementById('music-control').style.display = 'flex';
             setTimeout(() => { document.getElementById('main-content').style.opacity = '1'; }, 50);
         }
 
