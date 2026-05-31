@@ -458,8 +458,16 @@
 
                     setTimeout(() => {
                         if (!isIOS()) {
-                            player.on('fullscreenchange', handleFullscreenChange);
-                            player.requestFullscreen().catch(() => showMainContent());
+                            const el = player.el();
+                            const reqFS = el.requestFullscreen || el.webkitRequestFullscreen;
+                            if (reqFS) {
+                                document.addEventListener('fullscreenchange', handleFullscreenChange);
+                                document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+                                const fsPromise = el.requestFullscreen ? el.requestFullscreen() : el.webkitRequestFullscreen.call(el);
+                                if (fsPromise && fsPromise.catch) fsPromise.catch(() => showMainContent());
+                            } else {
+                                showMainContent();
+                            }
                         } else {
                             showMainContent();
                         }
@@ -470,8 +478,9 @@
         }
 
         function handleFullscreenChange() {
-            if (!player.isFullscreen()) {
-                player.off('fullscreenchange', handleFullscreenChange);
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                document.removeEventListener('fullscreenchange', handleFullscreenChange);
+                document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
                 showMainContent();
             }
         }
