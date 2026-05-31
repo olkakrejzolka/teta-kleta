@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600&family=Montserrat:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/video.js@8/dist/video-js.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/video.js@8/dist/video.min.js"></script>
 
     <style>
         :root {
@@ -157,12 +159,23 @@
             flex-shrink: 0; 
         }
 
-        video {
+        .video-js {
             width: 100%;
-            max-height: 40vh; 
+            max-height: 40vh;
             display: block;
             border: 1px solid rgba(0,0,0,0.05);
         }
+        .video-js video { max-height: 40vh; }
+        .vjs-play-progress,
+        .vjs-volume-level { background: var(--boho-gold) !important; }
+        .vjs-big-play-button {
+            background: rgba(198,166,100,0.55) !important;
+            border-color: var(--boho-gold) !important;
+            border-radius: 0 !important;
+        }
+        .vjs-big-play-button:focus,
+        .vjs-big-play-button:hover { background: var(--boho-gold) !important; }
+        .vjs-control-bar { background: rgba(0,0,0,0.45) !important; }
 
         .poem-section {
             width: 100%;
@@ -275,15 +288,6 @@
             transition: opacity 0.8s ease;
         }
 
-        .loader-ring {
-            width: 54px;
-            height: 54px;
-            border: 3px solid rgba(198, 166, 100, 0.2);
-            border-top-color: var(--boho-gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
         .loader-text {
             font-family: 'Montserrat', sans-serif;
             font-weight: 300;
@@ -306,7 +310,7 @@
             transition: width 0.3s ease;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+
     </style>
 </head>
 <body>
@@ -315,7 +319,6 @@
 
     <!-- Ekran ładowania -->
     <div id="loading-screen">
-        <div class="loader-ring"></div>
         <div class="loader-bar-wrap"><div class="loader-bar" id="loader-bar"></div></div>
         <div class="loader-text" id="loader-text">Przygotowuję niespodziankę…</div>
     </div>
@@ -333,9 +336,9 @@
         
         <div class="vertical-layout">
             <div class="video-section">
-                <video id="birthdayVideo" controls playsinline>
+                <video id="birthdayVideo" class="video-js vjs-default-skin vjs-big-play-centered" controls playsinline>
                     <source src="0530.mp4" type="video/mp4">
-                    Twoja przeglądarka nie obsługuje odtwarzacza wideo.
+                    <p class="vjs-no-js">Twoja przeglądarka nie obsługuje odtwarzacza wideo.</p>
                 </video>
             </div>
 
@@ -357,7 +360,6 @@
     </div>
 
     <script>
-        const video = document.getElementById('birthdayVideo');
         const bgMusic = document.getElementById('bgMusic');
         const musicControl = document.getElementById('music-control');
         const musicBtnIcon = document.getElementById('musicBtnIcon');
@@ -365,13 +367,15 @@
 
         bgMusic.volume = 0.18;
 
+        // Inicjalizacja Video.js
+        const player = videojs('birthdayVideo', { controls: true, playsinline: true });
+
         window.onload = function() {
             fetch('wiersz.txt')
                 .then(response => response.text())
                 .then(text => { document.getElementById('poem-container').innerText = text; })
                 .catch(error => console.error(error));
 
-            // Pobierz wideo jako blob z paskiem postępu
             const loaderBar = document.getElementById('loader-bar');
             const loaderText = document.getElementById('loader-text');
 
@@ -391,7 +395,6 @@
                             if (total > 0) {
                                 loaderBar.style.width = Math.round((loaded / total) * 100) + '%';
                             } else {
-                                // brak Content-Length – animuj pulsująco
                                 loaderBar.style.width = '60%';
                             }
                             return read();
@@ -401,8 +404,7 @@
                     return read().then(() => new Blob(chunks, { type: 'video/mp4' }));
                 })
                 .then(blob => {
-                    video.src = URL.createObjectURL(blob);
-                    video.load();
+                    player.src({ src: URL.createObjectURL(blob), type: 'video/mp4' });
                     showWelcome();
                 })
                 .catch(e => {
@@ -430,14 +432,11 @@
             btn.disabled = true;
             btn.innerText = "Chwileczkę...";
 
-            // Odblokowanie audio SYNCHRONICZNIE w handlerze kliknięcia (wymóg iOS)
             bgMusic.play().catch(e => console.log(e));
             updateMusicUI(true);
-            // Odblokowanie wideo na iOS (musi być w tym samym callstack co kliknięcie)
-            video.muted = true;
-            video.play().then(() => { video.pause(); video.muted = false; video.currentTime = 0; }).catch(() => {});
+            player.muted(true);
+            player.play().then(() => { player.pause(); player.muted(false); player.currentTime(0); }).catch(() => {});
 
-            // Wybuch konfetti
             const modernPalette = ['#7d8c7c', '#c6a664', '#fcfbf9', '#a2aa9b'];
             confetti({ particleCount: 200, spread: 120, origin: { y: 0.6 }, colors: modernPalette });
             let end = Date.now() + 2500;
@@ -447,52 +446,36 @@
                 confetti({ particleCount: 10, angle: 120, spread: 55, origin: { x: 1, y: 0.6 }, colors: modernPalette });
             }, 300);
 
-            // Nowa, agresywna metoda na FullScreen
-            // Zamiast pokazywać stronę i potem film, najpierw wyrzucamy sam FILM na cały ekran.
             setTimeout(() => {
                 document.getElementById('welcome-screen').style.opacity = '0';
-                
+
                 setTimeout(() => {
                     document.getElementById('welcome-screen').style.display = 'none';
 
-                    // Element musi być w DOM (nie display:none) żeby fullscreen działał
-                    // Pokazujemy main-content jako niewidoczny (opacity:0), potem fullscreen
                     const mainContent = document.getElementById('main-content');
                     mainContent.style.display = 'flex';
                     mainContent.style.opacity = '0';
 
                     setTimeout(() => {
-                        // Pomijamy fullscreen tylko na iOS (przejmuje sesję audio)
-                        const reqFS = !isIOS() && (video.requestFullscreen || video.webkitRequestFullscreen);
-                        if (reqFS) {
-                            document.addEventListener('fullscreenchange', handleFullscreenChange);
-                            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-                            const fsPromise = video.requestFullscreen
-                                ? video.requestFullscreen()
-                                : video.webkitRequestFullscreen.call(video);
-                            if (fsPromise && fsPromise.catch) {
-                                fsPromise.catch(() => showMainContent());
-                            }
+                        if (!isIOS()) {
+                            player.on('fullscreenchange', handleFullscreenChange);
+                            player.requestFullscreen().catch(() => showMainContent());
                         } else {
                             showMainContent();
                         }
-                        video.play().catch(e => console.log(e));
+                        player.play().catch(e => console.log(e));
                     }, 100);
                 }, 500);
-            }, 1500); // 1.5 sekundy po konfetti
+            }, 1500);
         }
 
-        // Funkcja wywoływana, gdy jubilatka wyjdzie z filmu na pełnym ekranie
         function handleFullscreenChange() {
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                // Posprzątanie słuchaczy i wyświetlenie strony głównej z wierszem
-                document.removeEventListener('fullscreenchange', handleFullscreenChange);
-                document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+            if (!player.isFullscreen()) {
+                player.off('fullscreenchange', handleFullscreenChange);
                 showMainContent();
             }
         }
 
-        // Funkcja bezpiecznie ładująca główną zawartość
         function showMainContent() {
             document.getElementById('main-content').style.display = 'flex';
             document.getElementById('music-control').style.display = 'flex';
