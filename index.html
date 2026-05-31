@@ -8,8 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600&family=Montserrat:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/video.js@8/dist/video-js.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/video.js@8/dist/video.min.js"></script>
+    <script src="https://player.vimeo.com/api/player.js"></script>
 
     <style>
         :root {
@@ -159,23 +158,16 @@
             flex-shrink: 0; 
         }
 
-        .video-js {
-            width: 100%;
-            max-height: 40vh;
-            display: block;
-            border: 1px solid rgba(0,0,0,0.05);
+        .vimeo-wrapper {
+            position: relative;
+            padding-top: min(56.25%, 40vh);
         }
-        .video-js video { max-height: 40vh; }
-        .vjs-play-progress,
-        .vjs-volume-level { background: var(--boho-gold) !important; }
-        .vjs-big-play-button {
-            background: rgba(198,166,100,0.55) !important;
-            border-color: var(--boho-gold) !important;
-            border-radius: 0 !important;
+        .vimeo-wrapper iframe {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border: none;
         }
-        .vjs-big-play-button:focus,
-        .vjs-big-play-button:hover { background: var(--boho-gold) !important; }
-        .vjs-control-bar { background: rgba(0,0,0,0.45) !important; }
 
         .poem-section {
             width: 100%;
@@ -271,7 +263,14 @@
             .poem-section h2 { font-size: 1.1rem; }
             .poem-text { font-size: 1rem; }
             .gold-frame { top: 15px; left: 15px; right: 15px; bottom: 15px; }
-            video { max-height: 30vh; }
+            .vimeo-wrapper { padding-top: min(56.25%, 28vh); }
+
+            /* Na mobile pozwalamy stronie scrollować zamiast ciąć zawartość */
+            body, html { overflow: auto; height: auto; }
+            #main-content { height: auto; overflow: visible; }
+            .vertical-layout { overflow: visible; }
+            .poem-section { overflow: visible; min-height: 60vh; margin-bottom: 60px; }
+            .scrollable-poem { overflow: visible; }
         }
 
         /* --- EKRAN ŁADOWANIA --- */
@@ -336,10 +335,16 @@
         
         <div class="vertical-layout">
             <div class="video-section">
-                <video id="birthdayVideo" class="video-js vjs-default-skin vjs-big-play-centered" controls playsinline>
-                    <source src="0530.mp4" type="video/mp4">
-                    <p class="vjs-no-js">Twoja przeglądarka nie obsługuje odtwarzacza wideo.</p>
-                </video>
+                <div class="vimeo-wrapper">
+                    <iframe id="vimeoIframe"
+                        src="https://player.vimeo.com/video/1197185907?badge=0&autopause=0&player_id=0&app_id=58479"
+                        frameborder="0"
+                        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        title="Sto lat Ewuniu!"
+                        allowfullscreen>
+                    </iframe>
+                </div>
             </div>
 
             <div class="poem-section">
@@ -367,50 +372,18 @@
 
         bgMusic.volume = 0.18;
 
-        // Inicjalizacja Video.js
-        const player = videojs('birthdayVideo', { controls: true, playsinline: true });
+        let vimeoPlayer = null;
 
         window.onload = function() {
+            vimeoPlayer = new Vimeo.Player(document.getElementById('vimeoIframe'));
+
             fetch('wiersz.txt')
-                .then(response => response.text())
+                .then(r => r.text())
                 .then(text => { document.getElementById('poem-container').innerText = text; })
-                .catch(error => console.error(error));
+                .catch(e => console.error(e));
 
-            const loaderBar = document.getElementById('loader-bar');
-            const loaderText = document.getElementById('loader-text');
-
-            fetch('0530.mp4')
-                .then(response => {
-                    if (!response.ok) throw new Error('fetch error');
-                    const total = parseInt(response.headers.get('Content-Length') || '0');
-                    const reader = response.body.getReader();
-                    const chunks = [];
-                    let loaded = 0;
-
-                    function read() {
-                        return reader.read().then(({ done, value }) => {
-                            if (done) return;
-                            chunks.push(value);
-                            loaded += value.length;
-                            if (total > 0) {
-                                loaderBar.style.width = Math.round((loaded / total) * 100) + '%';
-                            } else {
-                                loaderBar.style.width = '60%';
-                            }
-                            return read();
-                        });
-                    }
-
-                    return read().then(() => new Blob(chunks, { type: 'video/mp4' }));
-                })
-                .then(blob => {
-                    player.src({ src: URL.createObjectURL(blob), type: 'video/mp4' });
-                    showWelcome();
-                })
-                .catch(e => {
-                    console.log('Blob preload nieudany, kontynuuję z oryginalnym src:', e);
-                    showWelcome();
-                });
+            document.getElementById('loader-bar').style.width = '100%';
+            setTimeout(showWelcome, 1000);
         };
 
         function showWelcome() {
@@ -432,11 +405,23 @@
             btn.disabled = true;
             btn.innerText = "Chwileczkę...";
 
+            // Muzyka — synchronicznie w handlerze kliknięcia
             bgMusic.play().catch(e => console.log(e));
             updateMusicUI(true);
-            player.muted(true);
-            player.play().then(() => { player.pause(); player.muted(false); player.currentTime(0); }).catch(() => {});
 
+            // Page fullscreen — synchronicznie, wymóg przeglądarki
+            if (!isIOS()) {
+                const el = document.documentElement;
+                if (el.requestFullscreen) {
+                    document.addEventListener('fullscreenchange', handleFullscreenChange);
+                    el.requestFullscreen().catch(() => {});
+                } else if (el.webkitRequestFullscreen) {
+                    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+                    el.webkitRequestFullscreen();
+                }
+            }
+
+            // Konfetti
             const modernPalette = ['#7d8c7c', '#c6a664', '#fcfbf9', '#a2aa9b'];
             confetti({ particleCount: 200, spread: 120, origin: { y: 0.6 }, colors: modernPalette });
             let end = Date.now() + 2500;
@@ -448,31 +433,10 @@
 
             setTimeout(() => {
                 document.getElementById('welcome-screen').style.opacity = '0';
-
                 setTimeout(() => {
                     document.getElementById('welcome-screen').style.display = 'none';
-
-                    const mainContent = document.getElementById('main-content');
-                    mainContent.style.display = 'flex';
-                    mainContent.style.opacity = '0';
-
-                    setTimeout(() => {
-                        if (!isIOS()) {
-                            const el = player.el();
-                            const reqFS = el.requestFullscreen || el.webkitRequestFullscreen;
-                            if (reqFS) {
-                                document.addEventListener('fullscreenchange', handleFullscreenChange);
-                                document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-                                const fsPromise = el.requestFullscreen ? el.requestFullscreen() : el.webkitRequestFullscreen.call(el);
-                                if (fsPromise && fsPromise.catch) fsPromise.catch(() => showMainContent());
-                            } else {
-                                showMainContent();
-                            }
-                        } else {
-                            showMainContent();
-                        }
-                        player.play().catch(e => console.log(e));
-                    }, 100);
+                    showMainContent();
+                    if (vimeoPlayer) vimeoPlayer.play().catch(() => {});
                 }, 500);
             }, 1500);
         }
@@ -481,7 +445,7 @@
             if (!document.fullscreenElement && !document.webkitFullscreenElement) {
                 document.removeEventListener('fullscreenchange', handleFullscreenChange);
                 document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-                showMainContent();
+                // Treść już widoczna po showMainContent() — nic do zrobienia
             }
         }
 
